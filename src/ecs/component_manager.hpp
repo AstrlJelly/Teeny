@@ -9,15 +9,16 @@
 #include "component.hpp"
 
 
-#define DEFINE_PLURAL_COMPONENT_FUNC(returnType, funcName, defArgs, callArgs)\
+// must concatenate s, unfortunately
+#define DEFINE_PLURAL_COMPONENT_FUNC(returnType, componentFunc, defArgs, callArgs)\
     template<ComponentData... TArgs>\
-    returnType funcName defArgs\
-    { return this->funcName<TArgs...> callArgs; }
+    returnType componentFunc##s defArgs\
+    { return this->componentFunc<TArgs...> callArgs; }
 
-#define DEFINE_PLURAL_COMPONENT_FUNC_RETURN(funcName, defArgs, callArgs)\
-    DEFINE_PLURAL_COMPONENT_FUNC(std::tuple<TArgs&...>, funcName, defArgs, callArgs)
-#define DEFINE_PLURAL_COMPONENT_FUNC_VOID(funcName, defArgs, callArgs)\
-    DEFINE_PLURAL_COMPONENT_FUNC(void, funcName, defArgs, callArgs)
+#define DEFINE_PLURAL_COMPONENT_FUNC_RETURN(componentFunc, defArgs, callArgs)\
+    DEFINE_PLURAL_COMPONENT_FUNC(std::tuple<TArgs&...>, componentFunc, defArgs, callArgs)
+#define DEFINE_PLURAL_COMPONENT_FUNC_VOID(componentFunc, defArgs, callArgs)\
+    DEFINE_PLURAL_COMPONENT_FUNC(void, componentFunc, defArgs, callArgs)
 
 namespace teeny
 {
@@ -28,18 +29,32 @@ namespace teeny
         // unfortunately, the component pool must be a pointer
         // components are of various sizes therefore pools are too
         std::array<IComponentPool*, MAX_COMPONENT_TYPES> componentPools;
-    
+        ComponentSignature defaultComponents;
+
         template<ComponentData T>
         [[nodiscard]] ComponentPool<T>& get_component_pool()
         {
-            IComponentPool& componentPool = this->get_component_pool(get_component_id<T>());
-            return static_cast<ComponentPool<T>&>(componentPool);
+            return this->get_component_pool(get_component_id<T>());
         }
         [[nodiscard]] IComponentPool& get_component_pool(ComponentId_t componentId);
+
+        template<ComponentData T>
+        [[nodiscard]] ComponentPool<T>& obtain_component_pool()
+        {
+            return this->obtain_component_pool(get_component_id<T>());
+        }
+        [[nodiscard]] IComponentPool& obtain_component_pool(ComponentId_t componentId);
+
+
         
     public:
-        ComponentManager();
+        ComponentManager(ComponentSignature defaultComponents = {});
         ~ComponentManager();
+
+        ComponentSignature get_default_components()
+        {
+            return this->defaultComponents;
+        }
     
         [[nodiscard]] ComponentSignature& get_component_signature(EntityId_t entityId);
     
@@ -62,12 +77,12 @@ namespace teeny
         {
             ComponentId_t componentId = get_component_id<T>();
     
-            if (componentPools.at(componentId) == nullptr)
-            {
-                componentPools[componentId] = new ComponentPool<T>();
-            }
+            // if (componentPools.at(componentId) == nullptr)
+            // {
+            //     componentPools[componentId] = new ComponentPool<T>();
+            // }
     
-            ComponentPool<T>& componentPool = this->get_component_pool<T>();
+            ComponentPool<T>& componentPool = this->obtain_component_pool<T>();
     
             ComponentSignature& componentSignature = componentSignatures.at(entityId);
             componentSignature.set(componentId, true);
@@ -95,15 +110,9 @@ namespace teeny
         template<ComponentData T>
         void remove_component(EntityId_t entityId)
         {
-            ComponentId_t componentId = get_component_id<T>();
-    
-            if (componentPools.at(componentId) == nullptr)
-            {
-                
-            }
-    
-            ComponentPool<T>& componentPool = this->get_component_pool<T>();
-    
+            // ComponentId_t componentId = get_component_id<T>();
+            ComponentPool<T>& componentPool = this->obtain_component_pool<T>();
+
             ComponentSignature& componentSignature = this->get_component_signature(entityId);
             componentSignature.set(entityId, false);
     

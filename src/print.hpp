@@ -62,7 +62,7 @@ namespace teeny
     concept Printable = requires (T t) { std::cout << t; };
 
     template<char sep = ' ', Printable... TArgs>
-    inline void println(const TArgs&... args)
+    void println(const TArgs&... args)
     {
         // calls lambda for every argument
         ([args]{
@@ -70,13 +70,13 @@ namespace teeny
         }(), ...);
 
         // todo: check the edge cases with this to make sure
-        // todo  the carriage return doesn't break things
+        //todo   the carriage return doesn't break things
         // remove the last space, and reset the ansi color code
         std::cout << "\r" ANSI_STRINGIZE(ANSI_RESET_MINOR) << std::endl;
     }
 
     template<char sep = ' ', Printable... TArgs>
-    inline void println(const Severity severity = Severity::INFO, const TArgs&... args)
+    void println(const Severity severity = Severity::INFO, const TArgs&... args)
     {
         std::string severityLog = severityTags.at(static_cast<size_t>(severity));
         teeny::println<sep>(severityLog, args...);

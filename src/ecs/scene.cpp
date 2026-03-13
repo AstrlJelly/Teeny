@@ -12,8 +12,14 @@ void init_glfw_if_not_init()
 
 	if (!s_glfwInitialized)
 	{
-		int32_t result = glfwInit();
-		if (!result)
+		try
+		{
+			if (!glfwInit())
+			{
+				throw;
+			}
+		}
+		catch(...)
 		{
 			teeny::println(teeny::Severity::FATAL, "Failed to initialize GLFW");
 			exit(1);
@@ -29,8 +35,14 @@ void init_glad_if_not_init()
 	
 	if (!s_gladInitialized)
 	{
-		int32_t result = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		if (!result)
+		try
+		{
+			if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+			{
+				throw;
+			}
+		}
+		catch(...)
 		{
 			teeny::println(teeny::Severity::FATAL, "Failed to initialize GLAD");
 			exit(1);

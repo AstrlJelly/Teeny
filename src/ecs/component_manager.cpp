@@ -1,6 +1,7 @@
 #include "component_manager.hpp"
 
 #include <array>
+#include <cassert>
 #include <cstddef>
 
 #include "ecs/component.hpp"
@@ -12,11 +13,19 @@ namespace teeny
 {
 	IComponentPool& ComponentManager::get_component_pool(ComponentId_t componentId)
 	{
+		assert(componentPools.at(componentId) != nullptr);
 		return *componentPools.at(componentId);
 	}
 	
-	ComponentManager::ComponentManager()
+	IComponentPool& ComponentManager::obtain_component_pool(ComponentId_t componentId)
 	{
+
+		return this->get_component_pool(componentId);
+	}
+	
+	ComponentManager::ComponentManager(ComponentSignature defaultComponents)
+	{
+		this->defaultComponents = defaultComponents;
 		this->componentSignatures = std::array<ComponentSignature, ENTITY_START_CAPACITY>();
 		this->componentPools = std::array<IComponentPool*, MAX_COMPONENT_TYPES>();
 	}

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 4.2.0)
 
 if (NOT DEFINED CMAKE_CXX_COMPILER)
   set(CMAKE_C_COMPILER clang)
@@ -12,11 +12,13 @@ project(teeny VERSION 0.0.0)
 
 set(PROJECT_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/include")
 set(PROJECT_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/src")
-set(DEMO_DIR "${PROJECT_SOURCE_DIR}/demo")
-set(DEMO_SCRIPTS_DIR "${DEMO_DIR}/src")
+set(DEMO_SOURCE_DIR "${PROJECT_SOURCE_DIR}/demo")
+set(DEMO_SCRIPTS_DIR "${DEMO_SOURCE_DIR}/src")
 
 file(GLOB_RECURSE PROJECT_SCRIPTS "${PROJECT_SCRIPTS_DIR}/*.cpp")
+file(GLOB_RECURSE PROJECT_IMPL "${PROJECT_SCRIPTS_DIR}/*.hxx")
 file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SCRIPTS_DIR}/*.hpp")
+# file(GLOB_RECURSE PROJECT_MODULES "${PROJECT_SCRIPTS_DIR}/*.cppm")
 
 add_library(teeny STATIC ${PROJECT_SCRIPTS})
 
@@ -30,11 +32,8 @@ target_sources(teeny
   PRIVATE ${PROJECT_SCRIPTS}
 
   PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS
-      src/
-    FILES
-      ${PROJECT_HEADERS}
+    FILE_SET HEADERS TYPE HEADERS
+    FILES ${PROJECT_HEADERS} ${PROJECT_IMPL}
 )
 
 target_include_directories(teeny PRIVATE
@@ -63,6 +62,9 @@ target_include_directories(glad PUBLIC "${PROJECT_INCLUDE_DIR}")
 target_link_libraries(teeny PUBLIC
     glfw OpenGL::GL ImGui glad)
 
-file(GLOB_RECURSE DEMO_SCRIPTS "${DEMO_DIR}/*.cpp")
+file(GLOB_RECURSE DEMO_SCRIPTS "${DEMO_SOURCE_DIR}/*.cpp")
 add_executable(teenydemo ${DEMO_SCRIPTS})
 target_link_libraries(teenydemo PRIVATE teeny)
+
+target_include_directories(teenydemo PRIVATE
+    "${PROJECT_SCRIPTS_DIR}" "${PROJECT_INCLUDE_DIR}" "${PROJECT_BINARY_DIR}")

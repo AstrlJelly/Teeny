@@ -3,7 +3,7 @@
 #include "ecs/component_signature.hpp"
 #include "ecs/system.hpp"
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include "GLFW/glfw3.h"
 #include "glm/glm/ext/vector_float2.hpp"
 #include "glm/glm/ext/vector_float3.hpp"
 
@@ -18,7 +18,7 @@ namespace teeny
 {
     class Scene
     {
-      private:
+    private:
         GLFWwindow* window;
         glm::vec3 clearColor = glm::vec3(0.165f, 0.165f, 0.2f);
         double deltaTime;
@@ -85,7 +85,7 @@ namespace teeny
         {
             return this->componentManager.get_component<T>(entityId);
         }
-        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_components, (EntityId_t entityId), (entityId))
+        DEFINE_PLURAL_COMPONENT_FUNC_RETURN(get_component, (EntityId_t entityId), (entityId))
         
         template<ComponentData T>
         T& add_component(EntityId_t entityId, T component = T())
@@ -95,7 +95,7 @@ namespace teeny
             return result;
         }
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
-            add_components, (EntityId_t entityId, TArgs... components), (entityId, components...))
+            add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
 
         template<ComponentData T>
         [[nodiscard]] T& get_or_add_component(EntityId_t entityId, T component = T())
@@ -103,7 +103,7 @@ namespace teeny
             return this->componentManager.get_or_add_component<T>(entityId, component);
         }
         DEFINE_PLURAL_COMPONENT_FUNC_RETURN(
-            get_or_add_components, (EntityId_t entityId, TArgs... components), (entityId, components...))
+            get_or_add_component, (EntityId_t entityId, TArgs... components), (entityId, components...))
 
         template<ComponentData T>
         void remove_component(EntityId_t entityId)
@@ -112,7 +112,7 @@ namespace teeny
             this->systemManager.on_entity_signature_changed(entityId, this->get_component_signature(entityId));
         }
         DEFINE_PLURAL_COMPONENT_FUNC_VOID(
-            remove_components, (EntityId_t entityId), (entityId))
+            remove_component, (EntityId_t entityId), (entityId))
 
         /**
         * @brief Template function to check for a component
